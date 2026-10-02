@@ -1,0 +1,14 @@
+# ملفات محلية فقط — مش محتاجينها على Vercel
+download/
+scripts/*.png
+tests/
+db/
+dev.log
+server.log
+worklog.md
+.claude/
+.z-ai-config/
+tool-results/
+agent-ctx/
+.env.local
+.vercel/

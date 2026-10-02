@@ -1,0 +1,100 @@
+// SQLite schema — للساندبوكس المحلي فقط (المعاينة)
+// النسخة الرسمية للنشر: prisma/schema.prisma (PostgreSQL/Neon)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String       @id @default(cuid())
+  name            String
+  slug            String       @unique
+  phone           String       @unique
+  password        String
+  isGraduate      Boolean      @default(true)
+  college         String       @default("")
+  bio             String       @default("")
+  journey         String       @default("")
+  passion         String       @default("")
+  photo           String?
+  whatsappEnabled Boolean      @default(false)
+  whatsappNumber  String       @default("")
+  role            String       @default("ARTIST") // ARTIST | ADMIN
+  status          String       @default("ACTIVE") // ACTIVE | SUSPENDED
+  suspendReason   String       @default("")
+  views           Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  artworks        Artwork[]
+  inquiries       Inquiry[]
+  purchases       PurchaseRequest[]
+  appeals         Appeal[]
+}
+
+model Artwork {
+  id          String            @id @default(cuid())
+  artistId    String
+  artist      User              @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  title       String
+  price       Float             @default(0)
+  description String            @default("")
+  image       String?
+  status      String            @default("AVAILABLE") // AVAILABLE | SOLD
+  featured    Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  inquiries   Inquiry[]
+  purchases   PurchaseRequest[]
+}
+
+model Inquiry {
+  id        String   @id @default(cuid())
+  artistId  String
+  artist    User     @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  artworkId String?
+  artwork   Artwork? @relation(fields: [artworkId], references: [id], onDelete: SetNull)
+  name      String
+  phone     String
+  message   String   @default("")
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model PurchaseRequest {
+  id         String   @id @default(cuid())
+  artworkId  String
+  artwork    Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  artistId   String
+  artist     User     @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  buyerName  String
+  buyerPhone String
+  buyerCity  String   @default("")
+  address    String   @default("")
+  note       String   @default("")
+  status     String   @default("NEW") // NEW | CONTACTED | COMPLETED | CANCELLED
+  createdAt  DateTime @default(now())
+}
+
+model Appeal {
+  id        String   @id @default(cuid())
+  artistId  String
+  artist    User     @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  message   String
+  status    String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  adminNote String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSetting {
+  id            String   @id @default("main")
+  siteName      String   @default("رسمة")
+  tagline       String   @default("منصة خريجي كليات الفنون الجميلة")
+  heroTitle     String   @default("فنّك يستاهل يتشاف")
+  heroSubtitle  String   @default("اعمل بورتفوليو باسمك، اعرض لوحاتك، واستقبل طلبات شراء حقيقية — كل ده بلينك خاص بيك.")
+  announcement  String   @default("")
+  updatedAt     DateTime @updatedAt
+}
